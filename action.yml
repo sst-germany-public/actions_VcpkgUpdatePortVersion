@@ -1,0 +1,18 @@
+name: "VCPKG Updat Port Version Action"
+description: "Aktualisiert die Versionsnummer in einer vcpkg.json."
+inputs:
+  filename:
+    description: "Path and filename of the vcpkg.json."
+    required: true
+    default: ""
+  version:
+    description: "The new version."
+    required: true
+    default: ""
+
+outputs:
+  success:
+    description: "'true' on success otherwise 'false'."
+runs:
+  using: "node16"
+  main: "index.js"
