@@ -1,91 +1,84 @@
+// Inputs:
+// - vcpkgRegistryPath: Path to the vcpkg registry.
+// - portName: The port name to update.
+// - portVersion: The new version number of the port.
+// - portGitSHA: The Git-Commit-SHA of the port version, that is used for the update.
+
 const core = require('@actions/core');
 const fs = require('fs');
-const { exec } = require('child_process');
+const { execSync } = require('child_process');
 const path = require('path');
-            
 
+function updatePortVcpkgJson(vcpkgRegistryPath, portName, portVersion) {
+    if (!vcpkgRegistryPath) throw new Error('vcpkgRegistryPath is required');
+    if (!portName) throw new Error('portName is required');
+    if (!portVersion) throw new Error('portVersion is required');
 
-async function updateVersion(filename, version) {
-    if (!filename) throw new Error('Filename is required');
-    if (!version) throw new Error('Version is required');
+    const portfilePath = path.join(vcpkgRegistryPath, 'ports', portName, 'vcpkg.json');
 
-
-    // Datei einlesen
-    const raw = fs.readFileSync(filename, 'utf8');
-
-    // In JS-Objekt parsen
+    const raw = fs.readFileSync(portfilePath, 'utf8');
     const json = JSON.parse(raw);
 
-    // Version ändern
-    json.version = version;
+    json.version = portVersion;
 
-    // Datei zurückschreiben (schön formatiert)
-    fs.writeFileSync(filename, JSON.stringify(json, null, 2));
+    fs.writeFileSync(portfilePath, JSON.stringify(json, null, 2));
 
-    console.log(`✅ Version auf ${json.version} aktualisiert`);
+    console.log(`✅ ${portfilePath}: Version auf ${json.version} aktualisiert`);
 }
 
-async function runVcpkgAddVersion() {
-    return new Promise((resolve, reject) => {
-        // Pfad zu vcpkg.exe unter Windows
-        const cmd = '..\\vcpkg\\vcpkg.exe x-add-version meinlib --overwrite-version';
+function updatePortfileCMake(vcpkgRegistryPath, portName, portGitSHA) {
+    if (!vcpkgRegistryPath) throw new Error('vcpkgRegistryPath is required');
+    if (!portName) throw new Error('portName is required');
+    if (!portGitSHA) throw new Error('portGitSHA is required');
 
-        exec(cmd, { shell: 'cmd.exe' }, (error, stdout, stderr) => {
-            if (error) {
-                reject(`Fehler beim Ausführen von vcpkg: ${error.message}`);
-                return;
-            }
+    const portfilePath = path.join(vcpkgRegistryPath, 'ports', portName, 'portfile.cmake');
 
-            if (stderr) {
-                console.warn(`⚠️ vcpkg Fehlerausgabe: ${stderr}`);
-            }
+    let content = fs.readFileSync(portfilePath, 'utf8');
+    const regex = /(REF\s+)([a-f0-9]{40})(\s+#\s+CICD\sReplace)/;
 
-            console.log(`✅ vcpkg Ausgabe:\n${stdout}`);
-            resolve();
-        });
-    });
-}
-
-async function sss() {
-	// (REF\s+)([a-f0-9]{40})(\s+#\s+CI/CD-Replace)
-	const portfilePath = 'portfile.cmake'; // Pfad zu Ihrer Datei
-	const newSha = '${{ steps.get_sha.outputs.CURRENT_SHA }}';
-
-	let content = fs.readFileSync(portfilePath, 'utf8');
-	const regex = /(REF\s+)([a-f0-9]{40})(\s+#\s+CICD\sReplace)/; // Regulärer Ausdruck, der REF gefolgt von einem 40-stelligen SHA findet
-	
-	if (content.match(regex)) {
-	  content = content.replace(regex, 'REF ' + newSha + ' # CICD Replace');
-	  fs.writeFileSync(portfilePath, content, 'utf8');
-	  console.log('portfile.cmake successfully updated with new SHA:', newSha);
-	} else {
-	  console.error('REF line not found in portfile.cmake.');
-	  process.exit(1);
-	}
-}
-
-async function run() {
-    try {
-        // Eingabeparameter auslesen
-        const filename = core.getInput('filename');
-        const version = core.getInput('version');
-
-        // Log ausgeben			 
-        console.log(`Input filename: ${filename}`);
-        console.log(`Input version: ${version}`);
-
-        await updateVersion(filename, version);
-        await runVcpkgAddVersion();
-
-        // Output setzen
-        core.setOutput('success', `true`);
+    if (content.match(regex)) {
+        content = content.replace(regex, 'REF ' + portGitSHA + ' # CICD Replace');
+        fs.writeFileSync(portfilePath, content, 'utf8');
+        console.log(`✅ ${portfilePath}: successfully updated with new SHA: ${portGitSHA}`);
+    } else {
+        throw new Error(`${portfilePath}: 'REF line not found in portfile.cmake.`);
     }
-    catch (error) {
-        core.setOutput('success', `false`);
+}
+
+function runVcpkXAddVersion(vcpkgRegistryPath, portName) {
+    if (!vcpkgRegistryPath) throw new Error('vcpkgRegistryPath is required');
+    if (!portName) throw new Error('portName is required');
+
+    const cmd = `vcpkg.exe x-add-version ${portName} --overwrite-version`;
+    try {
+        const output = execSync(cmd, { shell: 'cmd.exe', encoding: 'utf8' });
+        console.log(`✅ vcpkg Ausgabe:\n${output}`);
+    } catch (error) {
+        throw new Error(`Fehler beim Ausführen von vcpkg: ${error.message}`);
+    }
+}
+
+function run() {
+    try {
+        const vcpkgRegistryPath = core.getInput('vcpkgRegistryPath');
+        const portName = core.getInput('portName');
+        const portVersion = core.getInput('portVersion');
+        const portGitSHA = core.getInput('portGitSHA');
+
+        console.log(`Input vcpkgRegistryPath: ${vcpkgRegistryPath}`);
+        console.log(`Input portName: ${portName}`);
+        console.log(`Input portVersion: ${portVersion}`);
+        console.log(`Input portGitSHA: ${portGitSHA}`);
+
+        updatePortVcpkgJson(vcpkgRegistryPath, portName, portVersion);
+        updatePortfileCMake(vcpkgRegistryPath, portName, portGitSHA);
+        runVcpkXAddVersion(vcpkgRegistryPath, portName);
+
+        core.setOutput('success', 'true');
+    } catch (error) {
+        core.setOutput('success', 'false');
         core.setFailed(error.message);
     }
 }
 
 run();
-
-

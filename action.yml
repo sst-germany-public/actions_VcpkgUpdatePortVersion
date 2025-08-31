@@ -1,12 +1,20 @@
 name: "VCPKG Updat Port Version Action"
 description: "Aktualisiert die Versionsnummer in einer vcpkg.json."
 inputs:
-  filename:
-    description: "Path and filename of the vcpkg.json."
+  vcpkgRegistryPath:
+    description: "Path to the vcpkg registry folder."
+    required: true
+    default: "vcpkg-registry"
+  portName:
+    description: "The port name to update."
     required: true
     default: ""
-  version:
-    description: "The new version."
+  portVersion:
+    description: "The port version to update."
+    required: true
+    default: ""
+  portGitSHA:
+    description: "The port SHA to update."
     required: true
     default: ""
 
