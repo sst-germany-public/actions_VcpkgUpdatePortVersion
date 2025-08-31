@@ -1,2 +1,22 @@
-/node_modules
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 /package-lock.json
+
+# Build output (wir committen nur dist/, nicht .ncc_cache)
+!.gitkeep
+.ncc_cache/
+
+# Optional: Logs
+*.log
+
+# Optional: Editor/IDE
+.vscode/
+.idea/
+*.swp
+
+# OS-spezifisch
+.DS_Store
+Thumbs.db
