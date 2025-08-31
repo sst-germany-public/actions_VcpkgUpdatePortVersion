@@ -49,9 +49,16 @@ function runVcpkXAddVersion(vcpkgRegistryPath, portName) {
     if (!vcpkgRegistryPath) throw new Error('vcpkgRegistryPath is required');
     if (!portName) throw new Error('portName is required');
 
-    const cmd = `vcpkg.exe x-add-version ${portName} --overwrite-version`;
+    const cmd = `vcpkg --x-builtin-ports-root=./ports --x-builtin-registry-versions-dir=./versions x-add-version --all --verbose`;
+    //const cmd = `vcpkg.exe x-add-version ${portName} --overwrite-version`;
+
     try {
-        const output = execSync(cmd, { shell: 'cmd.exe', encoding: 'utf8' });
+        const output = execSync(cmd, {
+            cwd: vcpkgRegistryPath, // Arbeitsverzeichnis = Registry
+            shell: 'cmd.exe',
+            encoding: 'utf8'
+        });
+
         console.log(`✅ vcpkg Ausgabe:\n${output}`);
     } catch (error) {
         throw new Error(`Fehler beim Ausführen von vcpkg: ${error.message}`);
