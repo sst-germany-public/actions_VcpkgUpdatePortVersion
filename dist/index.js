@@ -27615,7 +27615,7 @@ function runVcpkFormatManifest(vcpkgRegistryPath, portName) {
             encoding: 'utf8'
         });
 
-        console.log(`✅ vcpkg Ausgabe:\n${output}`);
+        console.log(`✅ vcpkg format-manifest Ausgabe:\n${output}`);
     } catch (error) {
         throw new Error(`Fehler beim Ausführen von vcpkg format-manifest: ${error.message}`);
     }
@@ -27635,7 +27635,7 @@ function runVcpkXAddVersion(vcpkgRegistryPath, portName) {
             encoding: 'utf8'
         });
 
-        console.log(`✅ vcpkg Ausgabe:\n${output}`);
+        console.log(`✅ vcpkg x-add-version Ausgabe:\n${output}`);
     } catch (error) {
         throw new Error(`Fehler beim Ausführen von vcpkg x-add-version: ${error.message}`);
     }
