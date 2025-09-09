@@ -9,18 +9,23 @@ inputs:
     description: "The port name to update."
     required: true
     default: ""
+  updateVersionsDatabase:
+    description: "If 'true', updates the files of the './versions/' folder. In this case 'updatePortNameDatabase' must be false or not specified."
+    required: false
+    default: "false"
+  updatePortNameDatabase:
+    description: "If 'true', updates the files in the of the './ports/portName' folder.  In this case 'updateVersionsDatabase' must be false or not specified. How ever, the parameters 'portGitSHA' and 'portVersion' are required."
+    required: false
+    default: "false"
   portVersion:
-    description: "The port version to update."
-    required: true
+    description: "The new version number of the port."
+    required: false
     default: ""
   portGitSHA:
-    description: "The port SHA to update."
-    required: true
+    description: "The SHA of the commit from the port source repository, that contains the new version."
+    required: false
     default: ""
 
-outputs:
-  success:
-    description: "'true' on success otherwise 'false'."
 runs:
   using: "node16"
   main: "dist/index.js"

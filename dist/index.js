@@ -27645,22 +27645,46 @@ function run() {
     try {
         const vcpkgRegistryPath = core.getInput('vcpkgRegistryPath');
         const portName = core.getInput('portName');
+        const str_updateVersionsDatabase = core.getInput('updateVersionsDatabase');
+        const str_updatePortNameDatabase = core.getInput('updatePortNameDatabase');
         const portVersion = core.getInput('portVersion');
         const portGitSHA = core.getInput('portGitSHA');
 
         console.log(`Input vcpkgRegistryPath: ${vcpkgRegistryPath}`);
         console.log(`Input portName: ${portName}`);
+        console.log(`Input updateVersionsDatabase: ${str_updateVersionsDatabase}`);
+        console.log(`Input updatePortNameDatabase: ${str_updatePortNameDatabase}`);
         console.log(`Input portVersion: ${portVersion}`);
         console.log(`Input portGitSHA: ${portGitSHA}`);
 
-        updatePortVcpkgJson(vcpkgRegistryPath, portName, portVersion);
-        updatePortfileCMake(vcpkgRegistryPath, portName, portGitSHA);
-		runVcpkFormatManifest(vcpkgRegistryPath, portName);
-        runVcpkXAddVersion(vcpkgRegistryPath, portName);
+		// Konvert string to bool
+		const updateVersionsDatabase = str_updateVersionsDatabase.toLowerCase() === 'true';
+		const updatePortNameDatabase = str_updatePortNameDatabase.toLowerCase() === 'true';
+		
+		// Make sure Input is valid.
+		if (!updateVersionsDatabase && !updatePortNameDatabase) throw new Error('input.updateVersionsDatabase and input.updatePortNameDatabase must not both be "false".');
+		if (updateVersionsDatabase && updatePortNameDatabase) throw new Error('input.updateVersionsDatabase and input.updatePortNameDatabase must not both be "true".');
 
-        core.setOutput('success', 'true');
+		// Call methods depending on variables
+		if (updatePortNameDatabase) {			
+			if (!vcpkgRegistryPath) throw new Error('vcpkgRegistryPath is required');
+			if (!portName) throw new Error('portName is required');
+			if (!portGitSHA) throw new Error('portGitSHA is required');
+			if (!portVersion) throw new Error('portVersion is required');
+			
+			updatePortVcpkgJson(vcpkgRegistryPath, portName, portVersion);
+			updatePortfileCMake(vcpkgRegistryPath, portName, portGitSHA);
+		} else if (updateVersionsDatabase) {			
+			if (!vcpkgRegistryPath) throw new Error('vcpkgRegistryPath is required');
+			if (!portName) throw new Error('portName is required');
+			
+			runVcpkFormatManifest(vcpkgRegistryPath, portName);
+			runVcpkXAddVersion(vcpkgRegistryPath, portName);
+		} else {
+			throw new Error('Ha! Nicht nachgedacht. Check mal dein Skript du Dumpfnase...');
+		}
+
     } catch (error) {
-        core.setOutput('success', 'false');
         core.setFailed(error.message);
     }
 }
