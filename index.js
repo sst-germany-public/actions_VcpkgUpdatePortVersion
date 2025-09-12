@@ -70,8 +70,8 @@ function runVcpkXAddVersion(vcpkgRegistryPath, portName) {
     if (!vcpkgRegistryPath) throw new Error('vcpkgRegistryPath is required');
     if (!portName) throw new Error('portName is required');
 
-	const cmd = `vcpkg --x-builtin-ports-root="versions" --x-builtin-registry-versions-dir="ports" x-add-version ${portName} --verbose --overwrite-version`;
-	//const cmd = `vcpkg --x-builtin-ports-root="versions" --x-builtin-registry-versions-dir="ports" x-add-version --all --verbose`;
+	const cmd = `vcpkg --x-builtin-ports-root="ports" --x-builtin-registry-versions-dir="versions" x-add-version ${portName} --verbose --overwrite-version`;
+	//const cmd = `vcpkg --x-builtin-ports-root="ports" --x-builtin-registry-versions-dir="versions" x-add-version --all --verbose`;
 
     try {
         const output = execSync(cmd, {
