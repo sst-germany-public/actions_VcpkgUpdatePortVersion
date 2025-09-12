@@ -27606,7 +27606,7 @@ function runVcpkFormatManifest(vcpkgRegistryPath, portName) {
     if (!vcpkgRegistryPath) throw new Error('vcpkgRegistryPath is required');
     if (!portName) throw new Error('portName is required');
 
-	const portfilePath = path.join(vcpkgRegistryPath, 'ports', portName, 'vcpkg.json');
+	const portfilePath = path.join('ports', portName, 'vcpkg.json');
 
     const cmd = `vcpkg format-manifest "${portfilePath}"`;
 
@@ -27627,11 +27627,8 @@ function runVcpkXAddVersion(vcpkgRegistryPath, portName) {
     if (!vcpkgRegistryPath) throw new Error('vcpkgRegistryPath is required');
     if (!portName) throw new Error('portName is required');
 
-	const portsRoot = path.join(vcpkgRegistryPath, 'ports');
-    const versionsDir = path.join(vcpkgRegistryPath, 'versions');
-
-	const cmd = `vcpkg --x-builtin-ports-root="${portsRoot}" --x-builtin-registry-versions-dir="${versionsDir}" x-add-version ${portName} --verbose --overwrite-version`;
-	//const cmd = `vcpkg --x-builtin-ports-root="${portsRoot}" --x-builtin-registry-versions-dir="${versionsDir}" x-add-version --all --verbose`;
+	const cmd = `vcpkg --x-builtin-ports-root="versions" --x-builtin-registry-versions-dir="ports" x-add-version ${portName} --verbose --overwrite-version`;
+	//const cmd = `vcpkg --x-builtin-ports-root="versions" --x-builtin-registry-versions-dir="ports" x-add-version --all --verbose`;
 
     try {
         const output = execSync(cmd, {
