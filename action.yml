@@ -9,14 +9,6 @@ inputs:
     description: "The port name to update."
     required: true
     default: ""
-  updateVersionsDatabase:
-    description: "If 'true', updates the files of the './versions/' folder. In this case 'updatePortNameDatabase' must be false or not specified."
-    required: false
-    default: "false"
-  updatePortNameDatabase:
-    description: "If 'true', updates the files in the of the './ports/portName' folder.  In this case 'updateVersionsDatabase' must be false or not specified. How ever, the parameters 'portGitSHA' and 'portVersion' are required."
-    required: false
-    default: "false"
   portVersion:
     description: "The new version number of the port."
     required: false
